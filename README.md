@@ -69,13 +69,13 @@ The JSON API is a really great configuration-less module, but its disadvantages 
 - strict contract between front-end and back-end; especially complicated if working with large entities (ex. 300+ attribute custom entities - why I first tried drupal/graphql)
 - neither can handle Drupal's map field serialization well (as far as I know)
 
-![strict contracts vs fuzzy contracts](../images/strict-vs-fuzzy.png)
+![strict contracts vs fuzzy contracts](./images/strict-vs-fuzzy.png)
 
 GraphQL's serving specific queried data especially benefits mobile users. With tools and extensible options, Drupal/graphql extends a great provider, developer and consumer experiences. 
 
 And of course, the *corner cases* (i.e version maintenance, speed of development, etc):
 
-![why are manholes round](../images/sewer-edge-case.png)
+![why are manholes round](./images/sewer-edge-case.png)
 
 ## GraphQL Gotchas
 - GraphQL is protocol agnostic and only depends on the I/O of strings. Whereas an erroneous HTTP response may return a 404, GraphQL always returns a 200. Health checks beware. 
