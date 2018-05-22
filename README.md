@@ -73,14 +73,14 @@ The JSON API is a really great configuration-less module, but its disadvantages 
 
 GraphQL's serving specific queried data especially benefits mobile users. With tools and extensible options, Drupal/graphql extends a great provider, developer and consumer experiences. 
 
-And of course, the *corner cases* (i.e version maintenance, speed of development, etc):
+Why try it over the JSON API? Of course the "corner cases" (i.e progressive versioning, speed of development, get it?):
 
 ![why are manholes round](./images/sewer-edge-case.png)
 
 ## GraphQL Gotchas
 - GraphQL is protocol agnostic and only depends on the I/O of strings. Whereas an erroneous HTTP response may return a 404, GraphQL always returns a 200. Health checks beware. 
 - GraphQL does not rely on HTTP caching and outside of libraries like Apollo or Relay, GraphQL does not handle caching. 
-- Not as self-documenting as a *well* designed RESTful API as the focus is on data and not on affordances. 
+- Not as self-documenting as a well designed RESTful API as the focus is on data and not on affordances. 
 - Solves some problems and introduces others
 
 ## Headless Drupal 8 Setup
@@ -91,7 +91,7 @@ We are going to setup Drupal as a Todo List CMS. On the client-side we will use 
 - `drupal geco` -> `Todos`
 - `drupal geco` -> `TodoList`
 
-Our Custom Entities (TodoList and Todos) will have custom GQL Plugin Input Types and Mutations in-order that drupal/GraphQL module can utilize them. What drupal/GraphQL module CAN utilize can be validated in the `url.com/graphql/explorer` or `url.com/graphql/voyager`.
+Our Custom Entities (TodoList and Todos) will have custom GQL Plugin Input Types and Mutations in-order that drupal/GraphQL module can utilize them. What drupal/GraphQL module CAN utilize can be validated in the `https://headlessdrupal.lndo.site/graphql/explorer` or `https://headlessdrupal.lndo.site/graphql/voyager`.
 
 You can find the results in `02-headless-drupal` directory. 
 
@@ -116,8 +116,6 @@ GQL is protocol agnostic therefore it does not leverage typical HTTP methods of 
 | GET      | Query    |
 | PUT      | Mutation |
 | DELETE   | Mutation |
-
-*The following Inputs, Mutations and Query assume you have already created the Drupal instance in the next section*
 
 ### Inputs
 
@@ -391,6 +389,215 @@ cors.config:
 *This will avoid request pre-flight errors once your working from a single page application*
 
 We will create a couple components, namely a `TodoList` comprised of `Todos`. We will compose them of behaviors that include GraphQL queries via Higher Order Components. This way we can maintain the components as simple as possible.
+
+Status Update as of 5/22/18 @ 7PM: the Headless React app hasn't been completed. But here are a few takeaways about combining the Apollo GraphQL client, React and Recompose.
+
+- Locally setup a new ApolloClient
+
+```js
+import { ApolloClient } from 'apollo-client';
+import { HttpLink } from 'apollo-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+
+export const client = new ApolloClient({
+  link: new HttpLink({ uri: 'http://headlessdrupal.lndo.site:8000/graphql' }),
+  cache: new InMemoryCache(),
+  connectToDevTools: true,
+});
+```
+
+- Enwrap your application into with the ApolloProvider so every component has props to query/mutate data
+
+```js
+import React from 'react';
+import { ApolloProvider } from 'react-apollo';
+import styled from 'styled-components';
+
+import { client } from './client';
+import { Lists } from '../Lists/Lists';
+
+
+const Container = styled.div`
+  padding: 1em 3em;
+`
+
+export const App = () => (
+  <ApolloProvider client={client}>
+    <Container>
+      <h1>
+        Todo List
+      </h1>
+      <Lists />
+    </Container>
+  </ApolloProvider>
+)
+```
+
+- The following is a Higher Order Component (HOC) is an example that queries for a list of TodoLists. *Note how we utilize the Recompose utility library to enable branching edge cases such as Loading and Errors during HTTP transit*
+
+```js
+import React from 'react';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
+import { compose, branch, renderComponent, mapProps } from 'recompose';
+
+const _listsQuery = graphql(gql`
+    query {
+        todoListEntityQuery(filter:{}) {
+            count
+            entities{
+                entityId
+                ...on TodoListEntity{
+                    name
+                    state
+                }
+            }
+        }
+    }
+`);
+
+const massageLists = ({ data: { todoListEntityQuery: { entities }}}) => ({
+    lists: entities,
+});
+
+const isLoading = ({ data: { loading }}) => loading;
+
+const hasError = ({ data: { error }}) => error;
+
+const LoadingComponent = () => <p>Loading...</p>
+
+const ErrorComponent = ({ data: { error: { message }, ...props } }) => (
+    <React.Fragment>
+        <p style={{color: 'red'}}>{message}</p>
+        <code>{JSON.stringify(props)}</code>
+    </React.Fragment>
+);
+
+export const listsQuery = compose(
+    _listsQuery,
+    branch(isLoading, renderComponent(LoadingComponent)),
+    branch(hasError, renderComponent(ErrorComponent)),
+    mapProps(massageLists)
+);
+```
+
+- We utilize the above HOC as so
+
+```js
+import React from 'react';
+import { compose } from 'recompose';
+
+import { listsQuery } from '../../hoc/listsQuery';
+import { TodoList } from '../TodoList/TodoList';
+
+const enhance = compose(
+    listsQuery
+)
+
+export const Lists = enhance(({ lists }) => (
+   <React.Fragment>
+       {
+           lists.map(({ entityId, ...props }, i) => <TodoList id={entityId} key={i} {...props} />)
+       }
+   </React.Fragment>
+));
+```
+
+- Our TodoList leverages the following HOC so we can toggle its state of "Completion" or "Incompletion"
+
+```js
+import gql from 'graphql-tag';
+import { graphql } from 'react-apollo';
+import { compose, withHandlers, withState, mapProps } from 'recompose';
+
+const mutation = gql`
+    mutation updateTodoList($id: String, $input: TodoListInput) {
+        updateTodoList(id:$id, input:$input) {
+            errors
+            entity{
+                ...on TodoListEntity{
+                    name
+                    state
+                }
+            }
+        }
+    }
+`
+
+export const todoListMutation = compose(
+    graphql(mutation),
+    withState('originState', 'setOriginState', 0),
+    withHandlers({
+        completeTodoList: ({ mutate, id, state, originState, setOriginState }) => event => {
+            if (originState !== state) {
+                setOriginState(state)
+                originState = state;
+            }
+            mutate({
+                variables: {
+                    id,
+                    input: { 
+                        state: (originState === "1") ? "-1" : "1"
+                    },
+                },
+            }).then(({ data: { updateTodoList: { entity: { state } }}}) => {
+                console.log('[todoListMutation] State', state);
+                setOriginState(state);
+            }).catch(err => {
+                console.error(err);
+            });
+        }
+    }),
+    mapProps(({ originState, ...props }) => ({ state: originState, ...props })),
+)
+```
+
+- Our actual TodoList with branching Components and access to an event handler for the triggering of our mutation function
+
+```js
+import React from 'react';
+import FlexView from 'react-flexview';
+import { branch, compose, renderComponent } from 'recompose';
+
+import { todoListMutation } from '../../hoc/todoListMutation';
+
+const isComplete = ({ state }) => state === "1";
+
+const CompleteList = ({ id, name, completeTodoList }) => (
+    <FlexView>
+        <FlexView marginRight={'1em'}>
+        <h2 style={{color: 'gray', textDecoration: 'line-through'}}>{name}</h2>
+        </FlexView>
+        <FlexView vAlignContent={'center'}>
+            <div>
+                <button onClick={() => completeTodoList()}>Mark as Incomplete</button>
+            </div>
+        </FlexView>
+    </FlexView>
+);
+
+const IncompleteList = ({ id, name, completeTodoList }) => (
+    <FlexView>
+        <FlexView marginRight={'1em'}>
+            <h2>{name}</h2>
+        </FlexView>
+        <FlexView vAlignContent={'center'}>
+            <div>
+                <button onClick={() => completeTodoList()}>Mark as Complete</button>
+            </div>
+        </FlexView>
+    </FlexView>
+);
+
+const enhance = compose(
+    todoListMutation,
+    branch(isComplete, renderComponent(CompleteList), renderComponent(IncompleteList)),
+);
+
+export const TodoList = enhance();
+```
+
+*NOTE: as for 5/22/18 by 7PM I had only a few hours to put the above React components together and therefore left much to be desired as per the other CRUD components*
 
 ## Resources
 - This is an expansive topic (and my review thus far very basic), so be sure to checkout proper documentation, etc! 
