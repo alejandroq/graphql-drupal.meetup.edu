@@ -53,7 +53,7 @@ GraphQL (GQL), open sourced and developed by Facebook, defines itself as a query
 ## Why try GraphQL?
 As a consumer, GQL allows you to compose a query that declares exactly what you need; it returns exactly that. The composition process allows you to concatenate what would be numerous requests in a RESTful service into one request. As a result, a server can transmit both smaller and less frequent payloads, especially benefitting mobile devices with poor connections/compute.
 
-As a provider, GQL has powerful developer tools like GraphiQL and a type system. In our Drupal use case, the (GraphQL module)[https://www.drupal.org/project/graphql], maintains both Voyager and Explorer (GraphiQL) routes: `/graphql/voyager` and `/graphql/explorer` appropriately. 
+As a provider, GQL has powerful developer tools like GraphiQL and a type system. In our Drupal use case, the [GraphQL module](https://www.drupal.org/project/graphql), maintains both Voyager and Explorer (GraphiQL) routes: `/graphql/voyager` and `/graphql/explorer` appropriately. 
 
 A few use cases: 
 - As an obfuscating layer over an ugly and/or legacy API
