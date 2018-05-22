@@ -3,7 +3,7 @@
 
 - [An Introduction to GraphQL for Drupal](#an-introduction-to-graphql-for-drupal)
     - [Goal](#goal)
-    - [Ulterior Goals](#ulterior-goals)
+    - [Ulterior Motives](#ulterior-motives)
     - [Requirements](#requirements)
     - [Optional Requirements](#optional-requirements)
     - [Agenda](#agenda)
@@ -22,8 +22,8 @@
 ## Goal
 Demo GraphQL in Drupal and point out further resources if interested.
 
-## Ulterior Goals
-Demonstrate that 'fuzzy' contracts are a more scalable solution then strignant ones. The latter requiring alignment between back-end and front-end developers and resulting: 1) dependency brittleness, 2) undesirable side-effects of Conway's Law and 3) more consciouness deprecation strategies. TL;DR: Querying an API from the client-side vs implementing a strict contract on said side.
+## Ulterior Motives
+Loosely demonstrate that 'fuzzy' contracts are a more scalable solution then strignant ones. The latter requiring alignment between back-end and front-end developers and resulting: 1) dependency brittleness, 2) undesirable side-effects of Conway's Law and 3) more conscientious deprecation strategies. TL;DR: Querying an API from the client-side vs implementing a strict contract on said side.
 
 GraphQL enables 'fuzzy' contracts between interdependent entities.
 
@@ -73,7 +73,7 @@ The JSON API is a really great configuration-less module, but its disadvantages 
 
 GraphQL's serving specific queried data especially benefits mobile users. With tools and extensible options, Drupal/graphql extends a great provider, developer and consumer experiences. 
 
-And of course, the *corner cases* (i.e version maintanence, speed of development, etc):
+And of course, the *corner cases* (i.e version maintenance, speed of development, etc):
 
 ![why are manholes round](../images/sewer-edge-case.png)
 
@@ -95,7 +95,7 @@ Our Custom Entities (TodoList and Todos) will have custom GQL Plugin Input Types
 
 You can find the results in `02-headless-drupal` directory. 
 
-I utilized Lando (a Docker utility) and Make to simplify enviornment instantation to two commands:
+I utilized Lando (a Docker utility) and Make to simplify environment instantiation to two commands:
 
 ```sh
 make dependencies && make
@@ -390,8 +390,9 @@ cors.config:
 
 *This will avoid request pre-flight errors once your working from a single page application*
 
-We will create a couple components, namely a `TodoList` comprised of `Todos`. We will compose them of behaviours that include GraphQL queiries via Higher Order Components. This way we can maintain the components as simple as possible.
+We will create a couple components, namely a `TodoList` comprised of `Todos`. We will compose them of behaviors that include GraphQL queries via Higher Order Components. This way we can maintain the components as simple as possible.
 
 ## Resources
 - This is an expansive topic (and my review thus far very basic), so be sure to checkout proper documentation, etc! 
 - https://www.amazeelabs.com/en/blog/graphql-for-drupal-basics
+
