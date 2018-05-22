@@ -1,0 +1,7 @@
+name: 'todo-lists'
+type: module
+description: 'A Basic Todo List Module'
+core: 8.x
+package: 'GraphQL-Tutorials'
+dependencies:
+  - graphql_core

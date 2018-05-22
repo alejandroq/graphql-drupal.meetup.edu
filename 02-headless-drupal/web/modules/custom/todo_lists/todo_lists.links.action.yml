@@ -1,0 +1,10 @@
+entity.todo_list_entity.add_form:
+  route_name: entity.todo_list_entity.add_form
+  title: 'Add Todo list entity'
+  appears_on:
+    - entity.todo_list_entity.collection
+entity.todo_entity.add_form:
+  route_name: entity.todo_entity.add_form
+  title: 'Add Todo entity'
+  appears_on:
+    - entity.todo_entity.collection

@@ -1,0 +1,28 @@
+
+# Todo list entity menu items definition
+entity.todo_list_entity.collection:
+  title: 'Todo list entity list'
+  route_name: entity.todo_list_entity.collection
+  description: 'List Todo list entity entities'
+  parent: system.admin_structure
+  weight: 100
+
+todo_list_entity.admin.structure.settings:
+  title: 'Todo list entity settings'
+  description: 'Configure Todo list entity entities'
+  route_name: todo_list_entity.settings
+  parent: system.admin_structure
+
+# Todo entity menu items definition
+entity.todo_entity.collection:
+  title: 'Todo entity list'
+  route_name: entity.todo_entity.collection
+  description: 'List Todo entity entities'
+  parent: system.admin_structure
+  weight: 100
+
+todo_entity.admin.structure.settings:
+  title: 'Todo entity settings'
+  description: 'Configure Todo entity entities'
+  route_name: todo_entity.settings
+  parent: system.admin_structure
