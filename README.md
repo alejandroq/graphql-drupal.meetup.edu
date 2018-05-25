@@ -82,6 +82,17 @@ Why try it over the JSON API? Of course the "corner cases" (i.e progressive vers
 - GraphQL does not rely on HTTP caching and outside of libraries like Apollo or Relay, GraphQL does not handle caching. 
 - Not as self-documenting as a well designed RESTful API as the focus is on data and not on affordances. 
 - Solves some problems and introduces others
+- In Drupal, `filters` require that the field name is the SQL Database's field name: i.e. GraphQL Entity Type may equal fieldIsPrivateGroup, but you would utilize:
+
+```gql
+# Note: the field is a boolean in Drupal, but MySQL does not natively support a boolean. The field's* type is `tinyint`, therefore 1 == true and 0 == false.
+# *field_is_private_group_value | tinyint(4)
+{
+  groupQuery(filter: {conditions: [{field: "field_is_private_group", value: ["1"], operator: EQUAL}]}) {
+    count
+  }
+}
+```
 
 ## Headless Drupal 8 Setup
 We are going to setup Drupal as a Todo List CMS. On the client-side we will use React. In-order to fulfill our Headless Drupal we will need a few things:
